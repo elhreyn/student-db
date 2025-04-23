@@ -1,68 +1,52 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="mt-5">Edit Student</h1>
-    <form id="edit-student-form">
+    <h2>Edit Student</h2>
+    <form id="editStudentForm">
         @csrf
-        @method('PUT')
         <div class="mb-3">
-            <label for="first_name" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="first_name" required>
-        </div>
-        <div class="mb-3">
-            <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="last_name" required>
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" required>
         </div>
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
             <input type="email" class="form-control" id="email" required>
         </div>
-        <div class="mb-3">
-            <label for="address" class="form-label">Address</label>
-            <input type="text" class="form-control" id="address">
-        </div>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="submit" class="btn btn-warning">Update Student</button>
     </form>
 
     <script>
-        const studentId = {{ $student->id }};
+        let studentId = window.location.pathname.split('/').pop();
 
-        // Fetch student data and populate form fields
         fetch(`/api/students/${studentId}`)
             .then(response => response.json())
             .then(student => {
-                document.getElementById('first_name').value = student.first_name;
-                document.getElementById('last_name').value = student.last_name;
+                document.getElementById('name').value = student.name;
                 document.getElementById('email').value = student.email;
-                document.getElementById('address').value = student.address;
-            })
-            .catch(error => console.log(error));
+            });
 
-        // Handle form submission to update student details
-        document.getElementById('edit-student-form').addEventListener('submit', function(e) {
-            e.preventDefault();
+        document.getElementById('editStudentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-            const studentData = {
-                first_name: document.getElementById('first_name').value,
-                last_name: document.getElementById('last_name').value,
-                email: document.getElementById('email').value,
-                address: document.getElementById('address').value
-            };
+            let name = document.getElementById('name').value;
+            let email = document.getElementById('email').value;
 
             fetch(`/api/students/${studentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
                 },
-                body: JSON.stringify(studentData)
+                body: JSON.stringify({ name, email })
             })
             .then(response => response.json())
             .then(data => {
-                alert('Student updated successfully');
-                window.location.href = '/';
-            })
-            .catch(error => console.log(error));
+                if (data.success) {
+                    window.location.href = `/student/${studentId}`;  // Redirect to student details page
+                } else {
+                    alert('Failed to update student');
+                }
+            });
         });
     </script>
 @endsection
